@@ -3,12 +3,12 @@ Recognizing human activities using Deep Learning
 
 ## Dataset - ![Recognition of Human Actions](http://www.nada.kth.se/cvap/actions/)
 
-- ![Walking.zip](http://www.nada.kth.se/cvap/actions/walking.zip)
-- ![Jogging.zip](http://www.nada.kth.se/cvap/actions/jogging.zip)
-- ![Running.zip](http://www.nada.kth.se/cvap/actions/running.zip)
-- ![Boxing.zip](http://www.nada.kth.se/cvap/actions/boxing.zip)
-- ![Handwaving.zip](http://www.nada.kth.se/cvap/actions/handwaving.zip)
-- ![Handclapping.zip](http://www.nada.kth.se/cvap/actions/handclapping.zip)
+- [Walking.zip](http://www.nada.kth.se/cvap/actions/walking.zip)
+- [Jogging.zip](http://www.nada.kth.se/cvap/actions/jogging.zip)
+- [Running.zip](http://www.nada.kth.se/cvap/actions/running.zip)
+- [Boxing.zip](http://www.nada.kth.se/cvap/actions/boxing.zip)
+- [Handwaving.zip](http://www.nada.kth.se/cvap/actions/handwaving.zip)
+- [Handclapping.zip](http://www.nada.kth.se/cvap/actions/handclapping.zip)
 
 ## Instructions
 1. Clone the repository and navigate to the downloaded folder.
@@ -28,9 +28,9 @@ Recognizing human activities using Deep Learning
 `Python 3.x`
 
 #### Libraries:
-- ![numpy, scipy, jupyter, ipython, matplotlib](https://scipy.org/install.html)
-- ![scikit-learn](http://scikit-learn.org/stable/install.html)
-- ![OpenCV](https://pypi.python.org/pypi/opencv-python)
-- ![Tensorflow](https://www.tensorflow.org/install/)
-- ![Keras](https://keras.io/#installation)
-- ![tqdm](https://pypi.python.org/pypi/tqdm#installation)
+- [numpy, scipy, jupyter, ipython, matplotlib](https://scipy.org/install.html)
+- [scikit-learn](http://scikit-learn.org/stable/install.html)
+- [OpenCV](https://pypi.python.org/pypi/opencv-python)
+- [Tensorflow](https://www.tensorflow.org/install/)
+- [Keras](https://keras.io/#installation)
+- [tqdm](https://pypi.python.org/pypi/tqdm#installation)
