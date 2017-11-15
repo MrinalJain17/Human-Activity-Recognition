@@ -1,0 +1,38 @@
+Data
+|
++-- boxing
+|   |
+|   +-- video_file_1
+|   ...
+|   +-- video_file_n
+|
++-- handcapping
+|   |
+|   +-- video_file_1
+|   ...
+|   +-- video_file_n
+|
++-- handwaving
+|   |
+|   +-- video_file_1
+|   ...
+|   +-- video_file_n
+|
++-- jogging
+|   |
+|   +-- video_file_1
+|   ...
+|   +-- video_file_n
+|
++-- running
+|   |
+|   +-- video_file_1
+|   ...
+|   +-- video_file_n
+|
++-- walking
+|   |
+|   +-- video_file_1
+|   ...
+|   +-- video_file_n
++
