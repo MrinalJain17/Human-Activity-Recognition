@@ -1,7 +1,7 @@
 # Human-Activity-Recognition
 Recognizing human activities using Deep Learning 
 
-## Dataset - ![Recognition of Human Actions](http://www.nada.kth.se/cvap/actions/)
+## Dataset - [Recognition of Human Actions](http://www.nada.kth.se/cvap/actions/)
 
 - [Walking.zip](http://www.nada.kth.se/cvap/actions/walking.zip)
 - [Jogging.zip](http://www.nada.kth.se/cvap/actions/jogging.zip)
