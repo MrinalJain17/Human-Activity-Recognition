@@ -1,7 +1,8 @@
 # Human-Activity-Recognition
-Recognizing human activities using Deep Learning 
+Recognizing human activities using Deep Learning
 
-## Dataset - [Recognition of Human Actions](http://www.nada.kth.se/cvap/actions/)
+## Dataset
+[Recognition of Human Actions](http://www.nada.kth.se/cvap/actions/)
 
 - [Walking.zip](http://www.nada.kth.se/cvap/actions/walking.zip)
 - [Jogging.zip](http://www.nada.kth.se/cvap/actions/jogging.zip)
@@ -12,18 +13,18 @@ Recognizing human activities using Deep Learning
 
 ## Instructions
 1. Clone the repository and navigate to the downloaded folder.
-	
-  ```	
+
+  ```
 		git clone https://github.com/MrinalJain17/Human-Activity-Recognition
   ```
-  
+
 2. Unzip the compressed data files and store in the format as mentioned in the `Directory Structure for Data`
 3. Run the notebook
 
   ```
 		jupyter notebook human_activity_recognition.ipynb
   ```
-  
+
 ## Requirements
 `Python 3.x`
 

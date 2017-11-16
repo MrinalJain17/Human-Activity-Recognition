@@ -29,7 +29,7 @@ def _read_video(path, target_size=None, to_gray=True,
 
             'middle': Extract 'N' frames from the middle
                 Remove ((total_frames - max_frames) // 2) frames from the beginning as well as the end
-                
+
         normalize_pixels (boolean): Default 'True'
             If 'True', then each pixel value will be normalized (divided by 255). Otherwise, not.
 
