@@ -18,7 +18,7 @@ Recognizing human activities using Deep Learning
 		git clone https://github.com/MrinalJain17/Human-Activity-Recognition
   ```
 
-2. Unzip the compressed data files and store in the format as mentioned in the `Directory Structure for Data`
+2. Unzip the compressed data files and store in the format as mentioned [here](https://github.com/MrinalJain17/Human-Activity-Recognition/blob/master/Directory%20Structure%20for%20Data.txt)
 3. Run the notebook
 
   ```
