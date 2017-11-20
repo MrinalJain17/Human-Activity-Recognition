@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 
 def _read_video(path, target_size=None, to_gray=True,
-                max_frames=None, extract_frames='middle', normalize_pixels=False):
+                max_frames=None, extract_frames='middle', single_fps=False, normalize_pixels=False):
     """
     Parameters:
         path (str): Required
@@ -30,6 +30,10 @@ def _read_video(path, target_size=None, to_gray=True,
             'middle': Extract 'N' frames from the middle
                 Remove ((total_frames - max_frames) // 2) frames from the beginning as well as the end
 
+        single_fps (boolean): Default 'False'
+            Extract 1 frame per second from the video.
+            (Only the first frame for each second in the video is extracted)
+
         normalize_pixels (boolean): Default 'True'
             If 'True', then each pixel value will be normalized (divided by 255). Otherwise, not.
 
@@ -40,6 +44,7 @@ def _read_video(path, target_size=None, to_gray=True,
 
     cap = VideoCapture(path)
     list_of_frames = []
+    fps = cap.get(5)                  # Frame Rate
 
     while(cap.isOpened()):
         ret, frame = cap.read()
@@ -54,10 +59,10 @@ def _read_video(path, target_size=None, to_gray=True,
                         Image.ANTIALIAS)).astype('uint8')
 
             if to_gray:
-                # Shape of each frame after conversion to gray scale -> (<height>, <width>)
                 gray = cvtColor(frame, COLOR_BGR2GRAY)
 
                 # Expanding dimension for gray channel
+                # Shape of each frame -> (<height>, <width>, 1)
                 list_of_frames.append(np.expand_dims(gray, axis=2))
             else:
                 # Shape of each frame -> (<height>, <width>, 3)
@@ -69,6 +74,8 @@ def _read_video(path, target_size=None, to_gray=True,
     destroyAllWindows()
 
     temp_video = np.stack(list_of_frames)
+    if single_fps:
+        temp_video = temp_video[np.arange(1, total_frames, fps)]
 
     if max_frames is not None:
 
@@ -97,7 +104,7 @@ def _read_video(path, target_size=None, to_gray=True,
 
 
 def read_videos(paths, target_size=None, to_gray=True,
-                max_frames=None, extract_frames='middle', normalize_pixels=True):
+                max_frames=None, extract_frames='middle', single_fps=False, normalize_pixels=True):
     """
     Parameters:
         paths (list): Required
@@ -121,6 +128,10 @@ def read_videos(paths, target_size=None, to_gray=True,
             'middle': Extract 'N' frames from the middle
                 Remove ((total_frames - max_frames) // 2) frames from the beginning as well as the end
 
+        single_fps (boolean): Default 'False'
+            Extract 1 frame per second from the videos.
+            (Only the first frame for each second in the video is extracted)
+
         normalize_pixels (boolean): Default 'True'
             If 'True', then each pixel value will be normalized (divided by 255). Otherwise, not.
 
@@ -135,7 +146,8 @@ def read_videos(paths, target_size=None, to_gray=True,
             target_size=target_size,
             to_gray=to_gray,
             max_frames=max_frames,
-            extract_frames=extract_frames) for path in tqdm(paths)]
+            extract_frames=extract_frames
+            single_fps=single_fps) for path in tqdm(paths)]
 
     if normalize_pixels:
         return np.vstack(list_of_videos).astype('float32') / 255
