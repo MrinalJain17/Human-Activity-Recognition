@@ -44,7 +44,7 @@ def _read_video(path, target_size=None, to_gray=True,
 
     cap = VideoCapture(path)
     list_of_frames = []
-    fps = cap.get(5)                  # Frame Rate
+    fps = int(cap.get(5))                  # Frame Rate
 
     while(cap.isOpened()):
         ret, frame = cap.read()
@@ -74,6 +74,7 @@ def _read_video(path, target_size=None, to_gray=True,
     destroyAllWindows()
 
     temp_video = np.stack(list_of_frames)
+    total_frames = temp_video.shape[0]
     if single_fps:
         temp_video = temp_video[np.arange(1, total_frames, fps)]
 
@@ -146,7 +147,7 @@ def read_videos(paths, target_size=None, to_gray=True,
             target_size=target_size,
             to_gray=to_gray,
             max_frames=max_frames,
-            extract_frames=extract_frames
+            extract_frames=extract_frames,
             single_fps=single_fps) for path in tqdm(paths)]
 
     if normalize_pixels:
