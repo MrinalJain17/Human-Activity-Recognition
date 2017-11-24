@@ -1,5 +1,5 @@
 import numpy as np
-from cv2 import VideoCapture, cvtColor, COLOR_BGR2GRAY, destroyAllWindows
+from cv2 import VideoCapture, cvtColor, COLOR_BGR2GRAY
 from PIL import Image
 from keras.preprocessing import image
 from keras.utils import to_categorical
@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 
 def _read_video(path, target_size=None, to_gray=True,
-                max_frames=None, extract_frames='middle', single_fps=False, normalize_pixels=False):
+                max_frames=None, extract_frames='middle', single_fps=False):
     """
     Parameters:
         path (str): Required
@@ -20,7 +20,9 @@ def _read_video(path, target_size=None, to_gray=True,
             If True, then each frame will be converted to gray scale. Otherwise, not.
 
         max_frames (int): Default 'None'
-            The maximum number of frames to return. Extra frames are removed based on the value of 'extract_frames'.
+            The maximum number of frames to return. Extra frames are removed based on the value of `extract_frames`.
+
+            If `single_fps` is set to `True`, then extra frames are removed from the total frames captured (at rate of 1 frame per second)
 
         extract_frames (str): {'first', 'middle', 'last'}, Default 'middle'
             'first': Extract the first 'N' frames
@@ -31,11 +33,8 @@ def _read_video(path, target_size=None, to_gray=True,
                 Remove ((total_frames - max_frames) // 2) frames from the beginning as well as the end
 
         single_fps (boolean): Default 'False'
-            Extract 1 frame per second from the video.
-            (Only the first frame for each second in the video is extracted)
-
-        normalize_pixels (boolean): Default 'True'
-            If 'True', then each pixel value will be normalized (divided by 255). Otherwise, not.
+            Capture 1 frame per second from the video.
+            (Only the first frame for each second in the video is captured)
 
     Returns:
         Numpy.ndarray
@@ -48,60 +47,87 @@ def _read_video(path, target_size=None, to_gray=True,
 
     while(cap.isOpened()):
         ret, frame = cap.read()
+        capture_frame = True
+        if single_fps:
+            capture_frame = (cap.get(1) % fps) == 1
 
         if ret:
-            if target_size is not None:
+            if capture_frame:
+                if target_size is not None:
 
-                temp_image = image.array_to_img(frame)
-                frame = image.img_to_array(
-                    temp_image.resize(
-                        target_size,
-                        Image.ANTIALIAS)).astype('uint8')
+                    temp_image = image.array_to_img(frame)
+                    frame = image.img_to_array(
+                        temp_image.resize(
+                            target_size,
+                            Image.ANTIALIAS)).astype('uint8')
 
-            if to_gray:
-                gray = cvtColor(frame, COLOR_BGR2GRAY)
+                if to_gray:
+                    gray = cvtColor(frame, COLOR_BGR2GRAY)
 
-                # Expanding dimension for gray channel
-                # Shape of each frame -> (<height>, <width>, 1)
-                list_of_frames.append(np.expand_dims(gray, axis=2))
-            else:
-                # Shape of each frame -> (<height>, <width>, 3)
-                list_of_frames.append(frame)
+                    # Expanding dimension for gray channel
+                    # Shape of each frame -> (<height>, <width>, 1)
+                    list_of_frames.append(np.expand_dims(gray, axis=2))
+                else:
+                    # Shape of each frame -> (<height>, <width>, 3)
+                    list_of_frames.append(frame)
         else:
             break
 
     cap.release()
-    destroyAllWindows()
 
     temp_video = np.stack(list_of_frames)
-    total_frames = temp_video.shape[0]
-    if single_fps:
-        temp_video = temp_video[np.arange(1, total_frames, fps)]
-
     if max_frames is not None:
+        temp_video = _process_video(
+            video=temp_video,
+            max_frames=max_frames,
+            extract_frames=extract_frames)
 
-        total_frames = temp_video.shape[0]
-        if max_frames <= total_frames:
+    return np.expand_dims(temp_video, axis=0)
 
-            if extract_frames == 'first':
-                temp_video = temp_video[:max_frames]
-            elif extract_frames == 'last':
-                temp_video = temp_video[(total_frames - max_frames):]
-            elif extract_frames == 'middle':
-                # No. of frames to remove from the front
-                front = ((total_frames - max_frames) // 2) + 1
-                temp_video = temp_video[front:(front + max_frames)]
-            else:
-                raise ValueError('Invalid value of \'extract_frames\'')
 
+def _process_video(video, max_frames, extract_frames='middle'):
+    """
+    Parameters:
+        video (Numpy.ndarray):
+            Shape = (<No. of frames>, <height>, <width>, <channels>)
+            Video whose pixels are needed to be processed
+
+        max_frames (int): Required
+            The maximum number of frames to return. Extra frames are removed based on the value of `extract_frames`.
+
+            If `single_fps` is set to `True`, then extra frames are removed from the total frames captured (at rate of 1 frame per second)
+
+        extract_frames (str): {'first', 'middle', 'last'}, Default 'middle'
+            'first': Extract the first 'N' frames
+
+            'last': Extract the last 'N' frames
+
+            'middle': Extract 'N' frames from the middle
+                Remove ((total_frames - max_frames) // 2) frames from the beginning as well as the end
+
+    Returns:
+        Numpy.ndarray
+            A tensor (processed video) with shape (<No. of frames>, <height>, <width>, <channels>)
+    """
+    total_frames = video.shape[0]
+    if max_frames <= total_frames:
+
+        if extract_frames == 'first':
+            video = video[:max_frames]
+        elif extract_frames == 'last':
+            video = video[(total_frames - max_frames):]
+        elif extract_frames == 'middle':
+            # No. of frames to remove from the front
+            front = ((total_frames - max_frames) // 2) + 1
+            video = video[front:(front + max_frames)]
         else:
-            raise IndexError(
-                'Required number of frames is greater than the total number of frames in the video')
+            raise ValueError('Invalid value of \'extract_frames\'')
 
-    if normalize_pixels:
-        return np.expand_dims((temp_video.astype('float32') / 255), axis=0)
     else:
-        return np.expand_dims(temp_video, axis=0)
+        raise IndexError(
+            'Required number of frames is greater than the total number of frames in the video')
+
+    return video
 
 
 def read_videos(paths, target_size=None, to_gray=True,
@@ -134,7 +160,7 @@ def read_videos(paths, target_size=None, to_gray=True,
             (Only the first frame for each second in the video is extracted)
 
         normalize_pixels (boolean): Default 'True'
-            If 'True', then each pixel value will be normalized (divided by 255). Otherwise, not.
+            If 'True', then each pixel value will be normalized to the range [-1, 1]. Otherwise, not.
 
     Returns:
         Numpy.ndarray
@@ -150,10 +176,12 @@ def read_videos(paths, target_size=None, to_gray=True,
             extract_frames=extract_frames,
             single_fps=single_fps) for path in tqdm(paths)]
 
+    tensor = np.vstack(list_of_videos)
+
     if normalize_pixels:
-        return np.vstack(list_of_videos).astype('float32') / 255
-    else:
-        return np.vstack(list_of_videos)
+        return (tensor - 128).astype('float32') / 128
+
+    return tensor
 
 
 def one_hot_encode(y, num_classes):
