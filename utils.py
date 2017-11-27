@@ -9,7 +9,7 @@ class Videos(object):
 
     def __init__(self, target_size=None, to_gray=True, max_frames=None,
                  extract_frames='middle', required_fps=None,
-                 normalize_pixels=True):
+                 normalize_pixels=None):
         """
         Initializing the config variables
 
@@ -37,8 +37,13 @@ class Videos(object):
 
                 Only the first 'N' frame(s) for each second in the video are captured.
 
-            normalize_pixels (boolean): Default 'True'
-                If 'True', then each pixel value will be normalized to the range [-1, 1]. Otherwise, not.
+            normalize_pixels (tuple/str): Default 'None'
+                If 'None', the pixels will not be normalized.
+
+                If a tuple - (New_min, New_max) is passed, Min-max Normalization will be used.
+
+                If the value is 'z-score', then Z-score Normalization will be used.
+                For each pixel p, z_score = (p - mean) / std
         """
 
         self.target_size = target_size
@@ -47,6 +52,7 @@ class Videos(object):
         self.extract_frames = extract_frames
         self.required_fps = required_fps
         self.normalize_pixels = normalize_pixels
+        self.fps = None
 
     def read_videos(self, paths):
         """
@@ -65,8 +71,21 @@ class Videos(object):
 
         tensor = np.vstack(list_of_videos)
 
-        if self.normalize_pixels:
-            return (tensor - 128).astype('float32') / 128
+        if self.normalize_pixels != None:
+            if (type(self.normalize_pixels) == tuple) and (len(self.normalize_pixels) == 2):
+                base = self.normalize_pixels[0]
+                r = self.normalize_pixels[1] - base
+                min_ = np.min(tensor)
+                max_ = np.max(tensor)
+                return ((tensor.astype('float32') - min_) / (max_ - min_)) * r + base
+
+            elif self.normalize_pixels == 'z-score':
+                mean = np.mean(tensor)
+                std = np.std(tensor)
+                return (tensor.astype('float32') - mean) / std
+
+            else:
+                raise ValueError('Invalid value of \'normalize_pixels\'')
 
         return tensor
 
@@ -83,14 +102,14 @@ class Videos(object):
 
         cap = VideoCapture(path)
         list_of_frames = []
-        fps = int(cap.get(5))                  # Frame Rate
+        self.fps = int(cap.get(5))                  # Frame Rate
 
         while(cap.isOpened()):
             ret, frame = cap.read()
             capture_frame = True
             if self.required_fps != None:
                 is_valid = range(1, (self.required_fps + 1))
-                capture_frame = (int(cap.get(1)) % fps) in is_valid
+                capture_frame = (int(cap.get(1)) % self.fps) in is_valid
 
             if ret:
                 if capture_frame:
