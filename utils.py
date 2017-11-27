@@ -62,7 +62,7 @@ class Videos(object):
 
         Returns:
             Numpy.ndarray
-                A tensor with shape (<No. of Videos>, <No. of frames>, <height>, <width>, <channels>)
+                A 5-d tensor with shape (<No. of Videos>, <No. of frames>, <height>, <width>, <channels>)
         """
 
         list_of_videos = [
@@ -89,6 +89,27 @@ class Videos(object):
 
         return tensor
 
+    def get_frame_count(self, paths):
+        """
+        Can be used to determine the value of `max_frames`
+
+        Parameters:
+            paths (list): Required
+                 A list of paths of the videos to be read
+
+        Returns:
+            dict (python dictionary)
+                For each video, the total number of frames in that video is stored in the dictionary.
+        """
+
+        frame_count = {}
+        for path in paths:
+            cap = VideoCapture(path)
+            frame_count[path] = int(cap.get(7))
+            cap.release()
+
+        return frame_count
+
     def _read_video(self, path):
         """
         Parameters:
@@ -97,7 +118,7 @@ class Videos(object):
 
         Returns:
             Numpy.ndarray
-                A tensor with shape (1, <No. of frames>, <height>, <width>, <channels>)
+                A 5-d tensor with shape (1, <No. of frames>, <height>, <width>, <channels>)
         """
 
         cap = VideoCapture(path)
