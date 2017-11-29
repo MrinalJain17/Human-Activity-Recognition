@@ -60,6 +60,6 @@ def download_files():
             print('-----------------------------{}------'.format('-' * len(file)))
             print('| Successfully extracted --> {}.zip |'.format(file))
             print('-----------------------------{}------'.format('-' * len(file)))
-			os.remove(file_name)
+            os.remove(file_name)
         else:
             print('\nUnsuccessful extraction --> {}.zip\n'.format(file))
