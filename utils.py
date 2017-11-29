@@ -1,5 +1,6 @@
 import numpy as np
-from cv2 import VideoCapture, cvtColor, COLOR_BGR2GRAY
+from skvideo.io import FFmpegReader, ffprobe
+from skvideo.utils import rgb2gray
 from PIL import Image
 from keras.preprocessing import image
 from tqdm import tqdm
@@ -104,9 +105,9 @@ class Videos(object):
 
         frame_count = {}
         for path in paths:
-            cap = VideoCapture(path)
-            frame_count[path] = int(cap.get(7))
-            cap.release()
+            cap = FFmpegReader(filename=path)
+            frame_count[path] = cap.inputframenum
+            cap.close()
 
         return frame_count
 
@@ -121,42 +122,35 @@ class Videos(object):
                 A 5-d tensor with shape (1, <No. of frames>, <height>, <width>, <channels>)
         """
 
-        cap = VideoCapture(path)
+        cap = FFmpegReader(filename=path)
         list_of_frames = []
-        self.fps = int(cap.get(5))                  # Frame Rate
+        self.fps = int(cap.inputfps)                  # Frame Rate
 
-        while(cap.isOpened()):
-            ret, frame = cap.read()
+        for index, frame in enumerate(cap.nextFrame()):
+
             capture_frame = True
             if self.required_fps != None:
-                is_valid = range(1, (self.required_fps + 1))
-                capture_frame = (int(cap.get(1)) % self.fps) in is_valid
+                is_valid = range(self.required_fps)
+                capture_frame = (index % self.fps) in is_valid
 
-            if ret:
-                if capture_frame:
+            if capture_frame:
 
-                    if self.target_size is not None:
-                        temp_image = image.array_to_img(frame)
-                        frame = image.img_to_array(
-                            temp_image.resize(
-                                self.target_size,
-                                Image.ANTIALIAS)).astype('uint8')
+                if self.target_size is not None:
+                    temp_image = image.array_to_img(frame)
+                    frame = image.img_to_array(
+                        temp_image.resize(
+                            self.target_size,
+                            Image.ANTIALIAS)).astype('uint8')
 
-                    if self.to_gray:
-                        gray = cvtColor(frame, COLOR_BGR2GRAY)
-
-                        # Expanding dimension for gray channel
-                        # Shape of each frame -> (<height>, <width>, 1)
-                        list_of_frames.append(np.expand_dims(gray, axis=2))
-                    else:
-                        # Shape of each frame -> (<height>, <width>, 3)
-                        list_of_frames.append(frame)
-            else:
-                break
-
-        cap.release()
+                # Shape of each frame -> (<height>, <width>, 3)
+                list_of_frames.append(frame)
 
         temp_video = np.stack(list_of_frames)
+        cap.close()
+
+        if self.to_gray:
+            temp_video = rgb2gray(temp_video)
+
         if self.max_frames is not None:
             temp_video = self._process_video(video=temp_video)
 

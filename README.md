@@ -11,6 +11,14 @@ Recognizing human activities using Deep Learning
 - [Handwaving.zip](http://www.nada.kth.se/cvap/actions/handwaving.zip)
 - [Handclapping.zip](http://www.nada.kth.se/cvap/actions/handclapping.zip)
 
+```
+NOTE:
+The following file is corrupted which might give an error when read - 
+'person01_boxing_d4_uncomp.avi' (present in 'Boxing.zip')
+
+Either fix the file or delete it before proceeding.
+```
+
 ## Instructions
 1. Clone the repository and navigate to the downloaded folder.
 
@@ -19,6 +27,8 @@ Recognizing human activities using Deep Learning
   ```
 
 2. Unzip the compressed data files and store in the format as mentioned [here](https://github.com/MrinalJain17/Human-Activity-Recognition/blob/master/Directory%20Structure%20for%20Data.txt)
+	- Use the helper function `download_files()` present in `data_utils.py` to do this in your current working directory automatically.
+
 3. Run the notebook
 
   ```
@@ -29,9 +39,9 @@ Recognizing human activities using Deep Learning
 `Python 3.x`
 
 #### Libraries:
-- [numpy, scipy, jupyter, ipython, matplotlib](https://scipy.org/install.html)
-- [scikit-learn](http://scikit-learn.org/stable/install.html)
-- [OpenCV](https://pypi.python.org/pypi/opencv-python)
+- [Numpy, Scipy, Jupyter, Ipython, Matplotlib](https://scipy.org/install.html)
+- [Scikit-learn](http://scikit-learn.org/stable/install.html)
+- [Scikit-video](http://www.scikit-video.org/stable/)
 - [Tensorflow](https://www.tensorflow.org/install/)
 - [Keras](https://keras.io/#installation)
 - [tqdm](https://pypi.python.org/pypi/tqdm#installation)
