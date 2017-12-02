@@ -11,29 +11,31 @@ Recognizing human activities using Deep Learning
 - [Handwaving.zip](http://www.nada.kth.se/cvap/actions/handwaving.zip)
 - [Handclapping.zip](http://www.nada.kth.se/cvap/actions/handclapping.zip)
 
-```
-NOTE:
-The following file is corrupted which might give an error when read - 
-'person01_boxing_d4_uncomp.avi' (present in 'Boxing.zip')
+There are a total of 599 videos, with each category having 100 videos (with the exception of `Handclapping` having 99 videos).
 
-Either fix the file or delete it before proceeding.
-```
+All the videos were captured at *25fps* frame rate. Each video has a spatial resolution of 120x160 pixels.
 
 ## Instructions
 1. Clone the repository and navigate to the downloaded folder.
 
-  ```
-		git clone https://github.com/MrinalJain17/Human-Activity-Recognition
-  ```
-
+```
+	git clone https://github.com/MrinalJain17/Human-Activity-Recognition
+	cd Human-Activity-Recognition
+```
 2. Unzip the compressed data files and store in the format as mentioned [here](https://github.com/MrinalJain17/Human-Activity-Recognition/blob/master/Directory%20Structure%20for%20Data.txt)
-	- Use the helper function `download_files()` present in `data_utils.py` to do this in your current working directory automatically.
+	- Use the helper function `download_files()` present in `data_utils.py` as follows to do this in your current working directory automatically. (The function will delete the compressed files after they are successfully extracted)
+```python
+	>>> import data_utils
+	>>> data_utils.download_files()
+```
+3. The following file is corrupted which gives an error when being loaded. **Delete it before proceeding**.
+	
+	`'person01_boxing_d4_uncomp.avi'` (present in `Data/Boxing/`)
+4. Run the notebook
 
-3. Run the notebook
-
-  ```
-		jupyter notebook human_activity_recognition.ipynb
-  ```
+```
+	jupyter notebook human_activity_recognition.ipynb
+```
 
 ## Requirements
 `Python 3.x`
