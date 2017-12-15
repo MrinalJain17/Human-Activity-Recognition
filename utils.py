@@ -73,18 +73,19 @@ class Videos(object):
         tensor = np.vstack(list_of_videos)
 
         if self.normalize_pixels != None:
+            # Pixels are normalized for each video individually
             if (type(self.normalize_pixels) == tuple) and (len(self.normalize_pixels) == 2):
                 base = self.normalize_pixels[0]
                 r = self.normalize_pixels[1] - base
-                min_ = np.min(tensor)
-                max_ = np.max(tensor)
+                min_ = np.min(tensor, axis=(1, 2, 3), keepdims=True)
+                max_ = np.max(tensor, axis=(1, 2, 3), keepdims=True)
                 return ((tensor.astype('float32') - min_) / (max_ - min_)) * r + base
 
             elif self.normalize_pixels == 'z-score':
-                mean = np.mean(tensor)
-                std = np.std(tensor)
+                mean = np.mean(tensor, axis=(1, 2, 3), keepdims=True)
+                std = np.std(tensor, axis=(1, 2, 3), keepdims=True)
                 return (tensor.astype('float32') - mean) / std
-
+            
             else:
                 raise ValueError('Invalid value of \'normalize_pixels\'')
 
@@ -150,7 +151,7 @@ class Videos(object):
 
         if self.to_gray:
             temp_video = rgb2gray(temp_video)
-
+                
         if self.max_frames is not None:
             temp_video = self._process_video(video=temp_video)
 
