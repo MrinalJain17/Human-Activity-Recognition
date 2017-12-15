@@ -3,6 +3,8 @@
 ## Capstone Project - Human Activity Recognition
 Recognizing human activities using Deep Learning
 
+View the project notebook here - [Link to Jupyter Notebook](http://nbviewer.jupyter.org/github/MrinalJain17/Human-Activity-Recognition/blob/master/human_activity_recognition.ipynb)
+
 ## Dataset
 [Recognition of Human Actions](http://www.nada.kth.se/cvap/actions/)
 
