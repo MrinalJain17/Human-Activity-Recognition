@@ -1,5 +1,6 @@
 import numpy as np
-from cv2 import VideoCapture, cvtColor, COLOR_BGR2GRAY
+from skvideo.io import FFmpegReader, ffprobe
+from skvideo.utils import rgb2gray
 from PIL import Image
 from keras.preprocessing import image
 from tqdm import tqdm
@@ -9,7 +10,7 @@ class Videos(object):
 
     def __init__(self, target_size=None, to_gray=True, max_frames=None,
                  extract_frames='middle', required_fps=None,
-                 normalize_pixels=True):
+                 normalize_pixels=None):
         """
         Initializing the config variables
 
@@ -37,8 +38,13 @@ class Videos(object):
 
                 Only the first 'N' frame(s) for each second in the video are captured.
 
-            normalize_pixels (boolean): Default 'True'
-                If 'True', then each pixel value will be normalized to the range [-1, 1]. Otherwise, not.
+            normalize_pixels (tuple/str): Default 'None'
+                If 'None', the pixels will not be normalized.
+
+                If a tuple - (New_min, New_max) is passed, Min-max Normalization will be used.
+
+                If the value is 'z-score', then Z-score Normalization will be used.
+                For each pixel p, z_score = (p - mean) / std
         """
 
         self.target_size = target_size
@@ -47,6 +53,7 @@ class Videos(object):
         self.extract_frames = extract_frames
         self.required_fps = required_fps
         self.normalize_pixels = normalize_pixels
+        self.fps = None
 
     def read_videos(self, paths):
         """
@@ -56,7 +63,7 @@ class Videos(object):
 
         Returns:
             Numpy.ndarray
-                A tensor with shape (<No. of Videos>, <No. of frames>, <height>, <width>, <channels>)
+                A 5-d tensor with shape (<No. of Videos>, <No. of frames>, <height>, <width>, <channels>)
         """
 
         list_of_videos = [
@@ -65,10 +72,45 @@ class Videos(object):
 
         tensor = np.vstack(list_of_videos)
 
-        if self.normalize_pixels:
-            return (tensor - 128).astype('float32') / 128
+        if self.normalize_pixels != None:
+            # Pixels are normalized for each video individually
+            if (type(self.normalize_pixels) == tuple) and (len(self.normalize_pixels) == 2):
+                base = self.normalize_pixels[0]
+                r = self.normalize_pixels[1] - base
+                min_ = np.min(tensor, axis=(1, 2, 3), keepdims=True)
+                max_ = np.max(tensor, axis=(1, 2, 3), keepdims=True)
+                return ((tensor.astype('float32') - min_) / (max_ - min_)) * r + base
+
+            elif self.normalize_pixels == 'z-score':
+                mean = np.mean(tensor, axis=(1, 2, 3), keepdims=True)
+                std = np.std(tensor, axis=(1, 2, 3), keepdims=True)
+                return (tensor.astype('float32') - mean) / std
+            
+            else:
+                raise ValueError('Invalid value of \'normalize_pixels\'')
 
         return tensor
+
+    def get_frame_count(self, paths):
+        """
+        Can be used to determine the value of `max_frames`
+
+        Parameters:
+            paths (list): Required
+                 A list of paths of the videos to be read
+
+        Returns:
+            dict (python dictionary)
+                For each video, the total number of frames in that video is stored in the dictionary.
+        """
+
+        frame_count = {}
+        for path in paths:
+            cap = FFmpegReader(filename=path)
+            frame_count[path] = cap.inputframenum
+            cap.close()
+
+        return frame_count
 
     def _read_video(self, path):
         """
@@ -78,45 +120,38 @@ class Videos(object):
 
         Returns:
             Numpy.ndarray
-                A tensor with shape (1, <No. of frames>, <height>, <width>, <channels>)
+                A 5-d tensor with shape (1, <No. of frames>, <height>, <width>, <channels>)
         """
 
-        cap = VideoCapture(path)
+        cap = FFmpegReader(filename=path)
         list_of_frames = []
-        fps = int(cap.get(5))                  # Frame Rate
+        self.fps = int(cap.inputfps)                  # Frame Rate
 
-        while(cap.isOpened()):
-            ret, frame = cap.read()
+        for index, frame in enumerate(cap.nextFrame()):
+
             capture_frame = True
             if self.required_fps != None:
-                is_valid = range(1, (self.required_fps + 1))
-                capture_frame = (int(cap.get(1)) % fps) in is_valid
+                is_valid = range(self.required_fps)
+                capture_frame = (index % self.fps) in is_valid
 
-            if ret:
-                if capture_frame:
+            if capture_frame:
 
-                    if self.target_size is not None:
-                        temp_image = image.array_to_img(frame)
-                        frame = image.img_to_array(
-                            temp_image.resize(
-                                self.target_size,
-                                Image.ANTIALIAS)).astype('uint8')
+                if self.target_size is not None:
+                    temp_image = image.array_to_img(frame)
+                    frame = image.img_to_array(
+                        temp_image.resize(
+                            self.target_size,
+                            Image.ANTIALIAS)).astype('uint8')
 
-                    if self.to_gray:
-                        gray = cvtColor(frame, COLOR_BGR2GRAY)
-
-                        # Expanding dimension for gray channel
-                        # Shape of each frame -> (<height>, <width>, 1)
-                        list_of_frames.append(np.expand_dims(gray, axis=2))
-                    else:
-                        # Shape of each frame -> (<height>, <width>, 3)
-                        list_of_frames.append(frame)
-            else:
-                break
-
-        cap.release()
+                # Shape of each frame -> (<height>, <width>, 3)
+                list_of_frames.append(frame)
 
         temp_video = np.stack(list_of_frames)
+        cap.close()
+
+        if self.to_gray:
+            temp_video = rgb2gray(temp_video)
+                
         if self.max_frames is not None:
             temp_video = self._process_video(video=temp_video)
 
