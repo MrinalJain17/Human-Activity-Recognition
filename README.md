@@ -65,10 +65,8 @@ Install `FFmpeg` on your machine
 
 For **Linux**:
 
-	```
 		$ sudo apt-get update
 		$ sudo apt-get install libav-tools
-	```
 
 For **Windows or MAC/OSX**:  
 Download the required binaries from [here](https://www.ffmpeg.org/download.html). Extract the zip file and add the location of binaries to the `PATH` variable
