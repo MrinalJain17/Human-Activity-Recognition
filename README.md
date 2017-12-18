@@ -23,15 +23,16 @@ All the videos were captured at *25fps* frame rate. Each video has a spatial res
 1. Clone the repository and navigate to the downloaded folder.
 
 	```
-		git clone https://github.com/MrinalJain17/Machine-Learning-Nanodegree.git
-		cd Human-Activity-Recognition/capstone_proposal
+		git clone https://github.com/MrinalJain17/Human-Activity-Recognition.git
+		cd Human-Activity-Recognition
 	```
 2. Unzip the compressed data files and store in the format as mentioned [here](https://github.com/MrinalJain17/Machine-Learning-Nanodegree/blob/master/capstone_proposal/Directory%20Structure%20for%20Data.txt)
 	- Use the helper function `download_files()` present in `data_utils.py` as follows to do this in your current working directory automatically. (The function will delete the compressed files after they are successfully extracted)
 
 	```python
-		>>> import data_utils
-		>>> data_utils.download_files()
+		import data_utils
+		
+		data_utils.download_files()
 	```
 3. The following file is corrupted which gives an error when being loaded. **Delete it before proceeding**.
 
