@@ -54,7 +54,7 @@ All the videos were captured at *25fps* frame rate. Each video has a spatial res
 		videos = reader.read_videos(video_absolute_paths)
 	```
 	Refer the [code](https://github.com/MrinalJain17/Human-Activity-Recognition/blob/master/utils.py#L17) for a detailed documentation.  
-	__This utility is being maintained in a seperate repository [here](https://github.com/MrinalJain17/video_utils)__
+	__This utility is being maintained in a seperate repository [here](https://github.com/MrinalJain17/mydia)__
 
 5. Run the following command to view the project notebook:
 	
