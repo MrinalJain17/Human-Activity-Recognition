@@ -1,5 +1,7 @@
 # Machine Learning Engineer Nanodegree
 
+:warning: This project is not maintained anymore :warning:
+
 ## Capstone Project - Human Activity Recognition
 Recognizing human activities using Deep Learning
 
